@@ -3,8 +3,8 @@
 # platform: osx-arm64
 absl-py
 aiohttp
-aioice
-aiortc
+# aioice
+# aiortc
 aiosignal
 aom
 async-timeout
@@ -27,7 +27,7 @@ dlib
 dnspython
 expat
 face-recognition
-face-recognition-models
+# face-recognition-models
 ffmpeg
 filelock
 flask
@@ -121,7 +121,7 @@ pthread-stubs
 py-opencv
 pycparser
 pyee
-pylibsrtp
+# pylibsrtp
 pyopenssl
 pysocks
 python
@@ -136,7 +136,7 @@ six
 svt-av1
 sympy
 tk
-torch
+# torch
 torchvision
 typing-extensions
 typing_extensions
