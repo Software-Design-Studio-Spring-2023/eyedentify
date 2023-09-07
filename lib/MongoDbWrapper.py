@@ -1,9 +1,11 @@
 from pymongo import MongoClient
+
+client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
+db = client["Online-Exam-System"]
+userCollection = db["Users"]
+
 class MongoDbWrapper:
     def insert_user(id, name,loggedIn, userType, email, password, image, encodeIp):
-        client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
-        db = client["Online-Exam-System"]
-        userCollection = db["Users"]
         new_document = {
             "id": id,
             "name": name,
@@ -19,13 +21,9 @@ class MongoDbWrapper:
             return insertion_result.inserted_id
         else:
             return None
-        client.close
     
     # Reutrns the whple doucment
     def query_whole_document(key, value):
-        client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
-        db = client["Online-Exam-System"]
-        userCollection = db["Users"]
         query = {key: value}
         found_documents = list(userCollection.find(query))
 
@@ -33,6 +31,9 @@ class MongoDbWrapper:
             return found_documents
         else:
             return None
-        client.close
-
-    # insert_user(12, "Frank", "Frank@student", "Student")
+    
+    def delete_one(key, value):
+        query = {key: value}
+        userCollection.delete_one(query)
+    
+client.close
