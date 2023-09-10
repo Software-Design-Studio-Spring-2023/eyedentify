@@ -22,6 +22,11 @@ ROOT = os.path.dirname(__file__) + "/frontend/"
 logger = logging.getLogger("pc")
 pcs = set()
 
+from pymongo import MongoClient
+
+client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
+db = client["Online-Exam-System"]
+userCollection = db["Users"]
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -99,7 +104,6 @@ class VideoTransformTrack(MediaStreamTrack):
         else:
             return frame
 
-
 async def index(request):
     content = open(os.path.join(ROOT, "index.html"), "r").read()
     return web.Response(content_type="text/html", text=content)
@@ -108,6 +112,13 @@ async def index(request):
 async def javascript(request):
     content = open(os.path.join(ROOT, "client.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
+
+async def getAllUsers(request):
+    allUsers = userCollection.find({})
+    allUsers = list(allUsers)
+    for user in allUsers:
+        user["_id"] = str(user["_id"])
+    return web.Response(content_type="application/json", text=json.dumps(allUsers))
 
 
 async def offer(request):
@@ -124,7 +135,7 @@ async def offer(request):
     log_info("Created for %s", request.remote)
 
     # prepare local media
-    player = MediaPlayer(os.path.join(ROOT, "demo-instruct.wav"))
+    # player = MediaPlayer(os.path.join(ROOT, "demo-instruct.wav"))
     # player.audio.set_volume(0)
     if args.write_audio:
         recorder = MediaRecorder(args.write_audio)
@@ -151,7 +162,7 @@ async def offer(request):
         log_info("Track %s received", track.kind)
 
         if track.kind == "audio":
-            pc.addTrack(player.audio)
+            # pc.addTrack(player.audio)
             recorder.addTrack(track)
         elif track.kind == "video":
             local_video = VideoTransformTrack(
@@ -216,9 +227,11 @@ if __name__ == "__main__":
 
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
+    
     app.router.add_get("/", index)
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
+    app.router.add_get("/api/all_users", getAllUsers)
     
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
