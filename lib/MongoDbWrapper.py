@@ -64,6 +64,5 @@ class MongoDbWrapper:
             user["_id"] = str(user["_id"])
         return all_users
 
-
     def close_connection(self):
         self.client.close()

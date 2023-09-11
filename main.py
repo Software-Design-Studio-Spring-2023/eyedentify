@@ -12,15 +12,20 @@ from av import VideoFrame
 
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
+from lib.MongoDbWrapper import MongoDbWrapper
 
 from lib.ObjectDetection import ObjectDetectionWrapper
+
 obj = ObjectDetectionWrapper("1")
+users_collection = MongoDbWrapper()
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
 
 logger = logging.getLogger("pc")
 pcs = set()
+
+from pymongo import MongoClient
 
 
 class VideoTransformTrack(MediaStreamTrack):
@@ -82,9 +87,7 @@ class VideoTransformTrack(MediaStreamTrack):
                 )
                 cv2.putText(
                     img,
-                    detection["name"]
-                    + " "
-                    + str(detection["percentage_probability"]),
+                    detection["name"] + " " + str(detection["percentage_probability"]),
                     (detection["box_points"][0], detection["box_points"][1]),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -95,7 +98,7 @@ class VideoTransformTrack(MediaStreamTrack):
             new_frame.pts = frame.pts
             new_frame.time_base = frame.time_base
             return new_frame
-            
+
         else:
             return frame
 
@@ -108,6 +111,14 @@ async def index(request):
 async def javascript(request):
     content = open(os.path.join(ROOT, "client.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
+
+
+async def get_all_users(request):
+    all_users = users_collection.all_users()
+    return web.Response(
+        content_type="application/json",
+        text=json.dumps(all_users),
+    )
 
 
 async def offer(request):
@@ -124,7 +135,7 @@ async def offer(request):
     log_info("Created for %s", request.remote)
 
     # prepare local media
-    player = MediaPlayer(os.path.join(ROOT, "demo-instruct.wav"))
+    # player = MediaPlayer(os.path.join(ROOT, "demo-instruct.wav"))
     # player.audio.set_volume(0)
     if args.write_audio:
         recorder = MediaRecorder(args.write_audio)
@@ -135,7 +146,7 @@ async def offer(request):
     def on_datachannel(channel):
         @channel.on("message")
         def on_message(message):
-            if isinstance(message, str) and message.startswith("ping"):  
+            if isinstance(message, str) and message.startswith("ping"):
                 channel.send("pong" + message[4:])
                 channel.send("detections: " + str(obj.currentDetectedObjects))
 
@@ -151,7 +162,7 @@ async def offer(request):
         log_info("Track %s received", track.kind)
 
         if track.kind == "audio":
-            pc.addTrack(player.audio)
+            # pc.addTrack(player.audio)
             recorder.addTrack(track)
         elif track.kind == "video":
             local_video = VideoTransformTrack(
@@ -216,10 +227,12 @@ if __name__ == "__main__":
 
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
+
     app.router.add_get("/", index)
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
-    
+    app.router.add_get("/api/all_users", get_all_users)
+
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
     )
