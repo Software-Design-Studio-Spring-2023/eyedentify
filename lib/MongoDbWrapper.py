@@ -2,7 +2,7 @@ from pymongo import MongoClient
 
 
 class MongoDbWrapper:
-    async def __init__(self, db_name, collection_name):
+    def __init__(self, db_name="Online-Exam-System", collection_name="Users"):
         self.client = MongoClient(
             "mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/"
         )
@@ -60,6 +60,3 @@ class MongoDbWrapper:
 
     def close_connection(self):
         self.client.close()
-
-
-MongoDbWrapper("Online-Exam-System", "Users")

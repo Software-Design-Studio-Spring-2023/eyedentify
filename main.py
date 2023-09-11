@@ -12,9 +12,12 @@ from av import VideoFrame
 
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
+from lib.MongoDbWrapper import MongoDbWrapper
 
 from lib.ObjectDetection import ObjectDetectionWrapper
+
 obj = ObjectDetectionWrapper("1")
+users_collection = MongoDbWrapper()
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
@@ -27,6 +30,7 @@ from pymongo import MongoClient
 client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
+
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -87,9 +91,7 @@ class VideoTransformTrack(MediaStreamTrack):
                 )
                 cv2.putText(
                     img,
-                    detection["name"]
-                    + " "
-                    + str(detection["percentage_probability"]),
+                    detection["name"] + " " + str(detection["percentage_probability"]),
                     (detection["box_points"][0], detection["box_points"][1]),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -100,9 +102,10 @@ class VideoTransformTrack(MediaStreamTrack):
             new_frame.pts = frame.pts
             new_frame.time_base = frame.time_base
             return new_frame
-            
+
         else:
             return frame
+
 
 async def index(request):
     content = open(os.path.join(ROOT, "index.html"), "r").read()
@@ -112,6 +115,7 @@ async def index(request):
 async def javascript(request):
     content = open(os.path.join(ROOT, "client.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
+
 
 async def getAllUsers(request):
     allUsers = userCollection.find({})
@@ -146,7 +150,7 @@ async def offer(request):
     def on_datachannel(channel):
         @channel.on("message")
         def on_message(message):
-            if isinstance(message, str) and message.startswith("ping"):  
+            if isinstance(message, str) and message.startswith("ping"):
                 channel.send("pong" + message[4:])
                 channel.send("detections: " + str(obj.currentDetectedObjects))
 
@@ -227,12 +231,12 @@ if __name__ == "__main__":
 
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
-    
+
     app.router.add_get("/", index)
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
     app.router.add_get("/api/all_users", getAllUsers)
-    
+
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
     )
