@@ -5,15 +5,14 @@ import logging
 import os
 import ssl
 import uuid
-
 import cv2
 from aiohttp import web
+# import tracemalloc
+import aiohttp_cors
 from av import VideoFrame
-
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 from lib.MongoDbWrapper import MongoDbWrapper
-
 from lib.ObjectDetection import ObjectDetectionWrapper
 
 obj = ObjectDetectionWrapper("1")
@@ -26,6 +25,8 @@ logger = logging.getLogger("pc")
 pcs = set()
 
 from pymongo import MongoClient
+
+
 
 
 class VideoTransformTrack(MediaStreamTrack):
@@ -232,6 +233,16 @@ if __name__ == "__main__":
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
     app.router.add_get("/api/all_users", get_all_users)
+    cors = aiohttp_cors.setup(app, defaults={
+    "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers="*",
+            allow_headers="*"
+        )
+    })
+
+    for route in list(app.router.routes()):
+        cors.add(route)
 
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
