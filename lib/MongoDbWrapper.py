@@ -2,12 +2,13 @@ from pymongo import MongoClient
 
 
 class MongoDbWrapper:
-    def __init__(self):
+    async def __init__(self, db_name, collection_name):
         self.client = MongoClient(
             "mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/"
         )
-        self.db = self.client["Online-Exam-System"]
-        self.userCollection = self.db["Users"]
+        self.db = self.client[db_name]
+        self.userCollection = self.db[collection_name]
+        print("Connected to MongoDB" + db_name + " " + collection_name)
 
     def insert_user(
         self, id, name, loggedIn, userType, email, password, image, encodeIp
@@ -59,3 +60,6 @@ class MongoDbWrapper:
 
     def close_connection(self):
         self.client.close()
+
+
+MongoDbWrapper("Online-Exam-System", "Users")
