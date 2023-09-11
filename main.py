@@ -27,10 +27,6 @@ pcs = set()
 
 from pymongo import MongoClient
 
-client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
-db = client["Online-Exam-System"]
-userCollection = db["Users"]
-
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -117,12 +113,12 @@ async def javascript(request):
     return web.Response(content_type="application/javascript", text=content)
 
 
-async def getAllUsers(request):
-    allUsers = userCollection.find({})
-    allUsers = list(allUsers)
-    for user in allUsers:
-        user["_id"] = str(user["_id"])
-    return web.Response(content_type="application/json", text=json.dumps(allUsers))
+async def get_all_users(request):
+    all_users = users_collection.all_users()
+    return web.Response(
+        content_type="application/json",
+        text=json.dumps(all_users),
+    )
 
 
 async def offer(request):
@@ -235,7 +231,7 @@ if __name__ == "__main__":
     app.router.add_get("/", index)
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
-    app.router.add_get("/api/all_users", getAllUsers)
+    app.router.add_get("/api/all_users", get_all_users)
 
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context

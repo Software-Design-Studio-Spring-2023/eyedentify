@@ -7,7 +7,7 @@ class MongoDbWrapper:
             "mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/"
         )
         self.db = self.client[db_name]
-        self.userCollection = self.db[collection_name]
+        self.user_collection = self.db[collection_name]
         print("Connected to MongoDB" + db_name + " " + collection_name)
 
     def insert_user(
@@ -57,6 +57,13 @@ class MongoDbWrapper:
     def logged_out(self, id_value):
         query = {"id": id_value}
         self.userCollection.update_one(query, {"$set": {"loggedIn": False}})
+
+    def all_users(self):
+        all_users = self.user_collection.find({})
+        all_users = list(all_users)
+        for user in all_users:
+            user["_id"] = str(user["_id"])
+        return all_users
 
     def close_connection(self):
         self.client.close()
