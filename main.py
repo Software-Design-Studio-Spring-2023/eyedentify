@@ -122,6 +122,47 @@ async def getAllUsers(request):
         user["_id"] = str(user["_id"])
     return web.Response(content_type="application/json", text=json.dumps(allUsers))
 
+async def update_login(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get('id', None)
+        data = await request.json()
+        loggedIn = data.get('loggedIn', None)
+
+        if user_id and loggedIn is not None:
+            # Find user by ID and update their loggedIn status
+            response = userCollection.update_one({'id': int(user_id)}, {'$set': {'loggedIn': loggedIn}})
+            
+            if response.matched_count:
+                return web.Response(content_type="application/json", text=json.dumps({'message': 'User status updated successfully'}))
+            else:
+                raise web.HTTPNotFound(text=json.dumps({'message': 'User not found'}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({'message': 'Invalid input'}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({'message': str(e)}))
+    
+async def update_warnings(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get('id', None)
+        data = await request.json()
+        warnings = data.get('warnings', None)
+
+        if user_id and warnings is not None:
+            # Find user by ID and update their loggedIn status
+            response = userCollection.update_one({'id': int(user_id)}, {'$set': {'warnings': warnings}})
+            
+            if response.matched_count:
+                return web.Response(content_type="application/json", text=json.dumps({'message': 'User status updated successfully'}))
+            else:
+                raise web.HTTPNotFound(text=json.dumps({'message': 'User not found'}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({'message': 'Invalid input'}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({'message': str(e)}))
 
 async def offer(request):
     params = await request.json()
@@ -234,6 +275,8 @@ if __name__ == "__main__":
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
     app.router.add_get("/api/all_users", getAllUsers)
+    app.router.add_patch("/api/update_login/{id}", update_login)
+    app.router.add_patch("/api/update_warnings/{id}", update_warnings)
 
     cors = aiohttp_cors.setup(app, defaults={
     "*": aiohttp_cors.ResourceOptions(
