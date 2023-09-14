@@ -130,7 +130,7 @@ async def update_login(request):
 
         if user_id and loggedIn is not None:
             # Find user by ID and update their loggedIn status
-            response = userCollection.update_one(
+            response = users_collection.update_one(
                 {"id": int(user_id)}, {"$set": {"loggedIn": loggedIn}}
             )
 
@@ -157,7 +157,7 @@ async def update_warnings(request):
 
         if user_id and warnings is not None:
             # Find user by ID and update their loggedIn status
-            response = userCollection.update_one(
+            response = users_collection.update_one(
                 {"id": int(user_id)}, {"$set": {"warnings": warnings}}
             )
 
@@ -184,8 +184,62 @@ async def update_login(request):
 
         if user_id and loggedIn is not None:
             # Find user by ID and update their loggedIn status
-            response = userCollection.update_one(
+            response = users_collection.update_one(
                 {"id": int(user_id)}, {"$set": {"loggedIn": loggedIn}}
+            )
+
+            if response.matched_count:
+                return web.Response(
+                    content_type="application/json",
+                    text=json.dumps({"message": "User status updated successfully"}),
+                )
+            else:
+                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({"message": str(e)}))
+
+
+async def update_terminate(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get("id", None)
+        data = await request.json()
+        terminated = data.get("terminated", None)
+
+        if user_id and terminated is not None:
+            # Find user by ID and update their loggedIn status
+            response = users_collection.update_one(
+                {"id": int(user_id)}, {"$set": {"terminated": terminated}}
+            )
+
+            if response.matched_count:
+                return web.Response(
+                    content_type="application/json",
+                    text=json.dumps({"message": "User status updated successfully"}),
+                )
+            else:
+                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({"message": str(e)}))
+
+
+async def update_terminate(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get("id", None)
+        data = await request.json()
+        terminated = data.get("terminated", None)
+
+        if user_id and terminated is not None:
+            # Find user by ID and update their loggedIn status
+            response = user_collection.update_one(
+                {"id": int(user_id)}, {"$set": {"terminated": terminated}}
             )
 
             if response.matched_count:
@@ -211,7 +265,7 @@ async def update_warnings(request):
 
         if user_id and warnings is not None:
             # Find user by ID and update their loggedIn status
-            response = userCollection.update_one(
+            response = users_collection.update_one(
                 {"id": int(user_id)}, {"$set": {"warnings": warnings}}
             )
 
@@ -341,6 +395,7 @@ if __name__ == "__main__":
     app.router.add_post("/offer", offer)
     app.router.add_patch("/api/update_login/{id}", update_login)
     app.router.add_patch("/api/update_warnings/{id}", update_warnings)
+    app.router.add_patch("/api/update_terminate/{id}", update_terminate)
 
     cors = aiohttp_cors.setup(
         app,
