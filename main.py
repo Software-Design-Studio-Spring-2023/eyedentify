@@ -8,7 +8,6 @@ import uuid
 import cv2
 from aiohttp import web
 
-# import tracemalloc
 import aiohttp_cors
 from av import VideoFrame
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
@@ -28,6 +27,10 @@ logger = logging.getLogger("pc")
 pcs = set()
 
 from pymongo import MongoClient
+
+client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
+db = client["Online-Exam-System"]
+userCollection = db["Users"]
 
 
 class VideoTransformTrack(MediaStreamTrack):
@@ -115,12 +118,12 @@ async def javascript(request):
     return web.Response(content_type="application/javascript", text=content)
 
 
-async def get_all_users(request):
-    all_users = users_collection.all_users()
-    return web.Response(
-        content_type="application/json",
-        text=json.dumps(all_users),
-    )
+async def getAllUsers(request):
+    allUsers = userCollection.find({})
+    allUsers = list(allUsers)
+    for user in allUsers:
+        user["_id"] = str(user["_id"])
+    return web.Response(content_type="application/json", text=json.dumps(allUsers))
 
 
 async def update_login(request):
@@ -132,61 +135,7 @@ async def update_login(request):
 
         if user_id and loggedIn is not None:
             # Find user by ID and update their loggedIn status
-            response = users_collection.update_one(
-                {"id": int(user_id)}, {"$set": {"loggedIn": loggedIn}}
-            )
-
-            if response.matched_count:
-                return web.Response(
-                    content_type="application/json",
-                    text=json.dumps({"message": "User status updated successfully"}),
-                )
-            else:
-                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
-        else:
-            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
-
-    except Exception as e:
-        return web.Response(status=500, text=json.dumps({"message": str(e)}))
-
-
-async def update_warnings(request):
-    try:
-        # Get user ID and update data from request
-        user_id = request.match_info.get("id", None)
-        data = await request.json()
-        warnings = data.get("warnings", None)
-
-        if user_id and warnings is not None:
-            # Find user by ID and update their loggedIn status
-            response = users_collection.update_one(
-                {"id": int(user_id)}, {"$set": {"warnings": warnings}}
-            )
-
-            if response.matched_count:
-                return web.Response(
-                    content_type="application/json",
-                    text=json.dumps({"message": "User status updated successfully"}),
-                )
-            else:
-                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
-        else:
-            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
-
-    except Exception as e:
-        return web.Response(status=500, text=json.dumps({"message": str(e)}))
-
-
-async def update_login(request):
-    try:
-        # Get user ID and update data from request
-        user_id = request.match_info.get("id", None)
-        data = await request.json()
-        loggedIn = data.get("loggedIn", None)
-
-        if user_id and loggedIn is not None:
-            # Find user by ID and update their loggedIn status
-            response = users_collection.update_one(
+            response = userCollection.update_one(
                 {"id": int(user_id)}, {"$set": {"loggedIn": loggedIn}}
             )
 
@@ -213,34 +162,7 @@ async def update_terminate(request):
 
         if user_id and terminated is not None:
             # Find user by ID and update their loggedIn status
-            response = users_collection.update_one(
-                {"id": int(user_id)}, {"$set": {"terminated": terminated}}
-            )
-
-            if response.matched_count:
-                return web.Response(
-                    content_type="application/json",
-                    text=json.dumps({"message": "User status updated successfully"}),
-                )
-            else:
-                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
-        else:
-            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
-
-    except Exception as e:
-        return web.Response(status=500, text=json.dumps({"message": str(e)}))
-
-
-async def update_terminate(request):
-    try:
-        # Get user ID and update data from request
-        user_id = request.match_info.get("id", None)
-        data = await request.json()
-        terminated = data.get("terminated", None)
-
-        if user_id and terminated is not None:
-            # Find user by ID and update their loggedIn status
-            response = user_collection.update_one(
+            response = userCollection.update_one(
                 {"id": int(user_id)}, {"$set": {"terminated": terminated}}
             )
 
@@ -267,7 +189,7 @@ async def update_warnings(request):
 
         if user_id and warnings is not None:
             # Find user by ID and update their loggedIn status
-            response = users_collection.update_one(
+            response = userCollection.update_one(
                 {"id": int(user_id)}, {"$set": {"warnings": warnings}}
             )
 
@@ -290,88 +212,20 @@ async def generate_token(user_id):
     API_KEY = "APIHQFZktdSvLyM"
     API_SECRET = "j7c47tGVqe3gZYe6Aai5YT2i2sr8fV9SuPAfI3PO0l9B"
 
-    # Create an access token which we will sign and return to the client,
-    # containing the grant we just created
-    token = AccessToken(API_KEY, API_SECRET, VideoGrant(room="exam", room_join=True), identity=user_id)
+    token = AccessToken(
+        API_KEY, API_SECRET, VideoGrant(room="exam", room_join=True), identity=user_id
+    )
     return token.to_jwt()
 
+
 async def get_livekit_token(request):
-    user_id = request.match_info.get('id')
+    user_id = request.match_info.get("id")
     if not user_id:
         return web.Response(status=400, text="User ID is required")
-    
+
     token = await generate_token(user_id)
-    return web.Response(content_type="application/json", text=json.dumps({"token": token}))
-
-
-
-async def offer(request):
-    params = await request.json()
-    offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
-
-    pc = RTCPeerConnection()
-    pc_id = "PeerConnection(%s)" % uuid.uuid4()
-    pcs.add(pc)
-
-    def log_info(msg, *args):
-        logger.info(pc_id + " " + msg, *args)
-
-    log_info("Created for %s", request.remote)
-
-    # prepare local media
-    # player = MediaPlayer(os.path.join(ROOT, "demo-instruct.wav"))
-    # player.audio.set_volume(0)
-    if args.write_audio:
-        recorder = MediaRecorder(args.write_audio)
-    else:
-        recorder = MediaBlackhole()
-
-    @pc.on("datachannel")
-    def on_datachannel(channel):
-        @channel.on("message")
-        def on_message(message):
-            if isinstance(message, str) and message.startswith("ping"):
-                channel.send("pong" + message[4:])
-                channel.send("detections: " + str(obj.currentDetectedObjects))
-
-    @pc.on("iceconnectionstatechange")
-    async def on_iceconnectionstatechange():
-        log_info("ICE connection state is %s", pc.iceConnectionState)
-        if pc.iceConnectionState == "failed":
-            await pc.close()
-            pcs.discard(pc)
-
-    @pc.on("track")
-    def on_track(track):
-        log_info("Track %s received", track.kind)
-
-        if track.kind == "audio":
-            # pc.addTrack(player.audio)
-            recorder.addTrack(track)
-        elif track.kind == "video":
-            local_video = VideoTransformTrack(
-                track, transform=params["video_transform"]
-            )
-            pc.addTrack(local_video)
-
-        @track.on("ended")
-        async def on_ended():
-            log_info("Track %s ended", track.kind)
-            await recorder.stop()
-
-    # handle offer
-    await pc.setRemoteDescription(offer)
-    await recorder.start()
-
-    # send answer
-    answer = await pc.createAnswer()
-    await pc.setLocalDescription(answer)
-
     return web.Response(
-        content_type="application/json",
-        text=json.dumps(
-            {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
-        ),
+        content_type="application/json", text=json.dumps({"token": token})
     )
 
 
@@ -412,14 +266,11 @@ if __name__ == "__main__":
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
 
-    app.router.add_get("/", index)
-    app.router.add_get("/client.js", javascript)
-    app.router.add_post("/offer", offer)
+    app.router.add_get("/api/all_users", getAllUsers)
     app.router.add_patch("/api/update_login/{id}", update_login)
     app.router.add_patch("/api/update_warnings/{id}", update_warnings)
     app.router.add_patch("/api/update_terminate/{id}", update_terminate)
     app.router.add_get("/api/get_livekit_token/{id}", get_livekit_token)
-
 
     cors = aiohttp_cors.setup(
         app,
