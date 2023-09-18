@@ -15,6 +15,8 @@ from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 from lib.MongoDbWrapper import MongoDbWrapper
 from lib.ObjectDetection import ObjectDetectionWrapper
+from livekit import AccessToken
+from livekit import VideoGrant
 
 obj = ObjectDetectionWrapper("1")
 users_collection = MongoDbWrapper()
@@ -283,6 +285,28 @@ async def update_warnings(request):
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
 
 
+async def generate_token(user_id):
+    # You need to replace "API_KEY" and "API_SECRET" with your LiveKit API credentials
+    API_KEY = "APIZwCre6ju7wNR"
+    API_SECRET = "ifHJXfPre7IelasUdyugq1MKTHtPP9QGHcteOXiqqG9B"
+
+    # Create an access token which we will sign and return to the client,
+    # containing the grant we just created
+    token = AccessToken(API_KEY, API_SECRET, VideoGrant(room="exam"))
+    token.identity = {'id': int(user_id)}
+
+    return token.to_jwt()
+
+async def get_livekit_token(request):
+    user_id = request.match_info.get('id')
+    if not user_id:
+        return web.Response(status=400, text="User ID is required")
+    
+    token = await generate_token(user_id)
+    return web.Response(content_type="application/json", text=json.dumps({"token": token}))
+
+
+
 async def offer(request):
     params = await request.json()
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
@@ -396,6 +420,8 @@ if __name__ == "__main__":
     app.router.add_patch("/api/update_login/{id}", update_login)
     app.router.add_patch("/api/update_warnings/{id}", update_warnings)
     app.router.add_patch("/api/update_terminate/{id}", update_terminate)
+    app.router.add_get("/api/get_livekit_token/{id}", get_livekit_token)
+
 
     cors = aiohttp_cors.setup(
         app,
