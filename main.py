@@ -4,108 +4,35 @@ import json
 import logging
 import os
 import ssl
-import uuid
-import cv2
 from aiohttp import web
-
 import aiohttp_cors
-from av import VideoFrame
-from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
-from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
-from lib.MongoDbWrapper import MongoDbWrapper
-from lib.ObjectDetection import ObjectDetectionWrapper
-from livekit import AccessToken
-from livekit import VideoGrant
-
-obj = ObjectDetectionWrapper("1")
-users_collection = MongoDbWrapper()
+from pymongo import MongoClient
+from lib.livekit_tokens import get_livekit_token
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
-
 logger = logging.getLogger("pc")
 pcs = set()
-
-from pymongo import MongoClient
-
 client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
 
 
-class VideoTransformTrack(MediaStreamTrack):
-    """
-    A video stream track that transforms frames from an another track.
-    """
-
-    kind = "video"
-
-    def __init__(self, track, transform):
-        super().__init__()  # don't forget this!
-        self.track = track
-        self.transform = transform
-
-    async def recv(self):
-        frame = await self.track.recv()
-
-        if self.transform == "cartoon":
-            img = frame.to_ndarray(format="bgr24")
-
-            # prepare color
-            img_color = cv2.pyrDown(cv2.pyrDown(img))
-            for _ in range(6):
-                img_color = cv2.bilateralFilter(img_color, 9, 9, 7)
-            img_color = cv2.pyrUp(cv2.pyrUp(img_color))
-
-            # prepare edges
-            img_edges = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-            img_edges = cv2.adaptiveThreshold(
-                cv2.medianBlur(img_edges, 7),
-                255,
-                cv2.ADAPTIVE_THRESH_MEAN_C,
-                cv2.THRESH_BINARY,
-                9,
-                2,
-            )
-            img_edges = cv2.cvtColor(img_edges, cv2.COLOR_GRAY2RGB)
-
-            # combine color and edges
-            img = cv2.bitwise_and(img_color, img_edges)
-
-            # rebuild a VideoFrame, preserving timing information
-            new_frame = VideoFrame.from_ndarray(img, format="bgr24")
-            new_frame.pts = frame.pts
-            new_frame.time_base = frame.time_base
-            return new_frame
-        elif self.transform == "object-detection":
-            img = frame.to_ndarray(format="bgr24")
-            detections = obj.detectFrameByFrame(img)
-            # draw the detection results onto the original image
-            for detection in detections[1]:
-                # print(detection["name"], " : ", detection["percentage_probability"], " : ", detection["box_points"])
-                cv2.rectangle(
-                    img,
-                    (detection["box_points"][0], detection["box_points"][1]),
-                    (detection["box_points"][2], detection["box_points"][3]),
-                    (0, 255, 0),
-                    2,
-                )
-                cv2.putText(
-                    img,
-                    detection["name"] + " " + str(detection["percentage_probability"]),
-                    (detection["box_points"][0], detection["box_points"][1]),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 255, 0),
-                    2,
-                )
-            new_frame = VideoFrame.from_ndarray(img, format="bgr24")
-            new_frame.pts = frame.pts
-            new_frame.time_base = frame.time_base
-            return new_frame
-
-        else:
-            return frame
+def setup_cli_args():
+    parser = argparse.ArgumentParser(
+        description="WebRTC audio / video / data-channels demo"
+    )
+    parser.add_argument("--cert-file", help="SSL certificate file (for HTTPS)")
+    parser.add_argument("--key-file", help="SSL key file (for HTTPS)")
+    parser.add_argument(
+        "--host", default="localhost", help="Host for HTTP server (default: localhost)"
+    )
+    parser.add_argument(
+        "--port", type=int, default=8080, help="Port for HTTP server (default: 8080)"
+    )
+    parser.add_argument("--verbose", "-v", action="count")
+    parser.add_argument("--write-audio", help="Write received audio to a file")
+    return parser.parse_args()
 
 
 async def index(request):
@@ -207,28 +134,6 @@ async def update_warnings(request):
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
 
 
-async def generate_token(user_id):
-    # You need to replace "API_KEY" and "API_SECRET" with your LiveKit API credentials
-    API_KEY = "APIHQFZktdSvLyM"
-    API_SECRET = "j7c47tGVqe3gZYe6Aai5YT2i2sr8fV9SuPAfI3PO0l9B"
-
-    token = AccessToken(
-        API_KEY, API_SECRET, VideoGrant(room="exam", room_join=True), identity=user_id
-    )
-    return token.to_jwt()
-
-
-async def get_livekit_token(request):
-    user_id = request.match_info.get("id")
-    if not user_id:
-        return web.Response(status=400, text="User ID is required")
-
-    token = await generate_token(user_id)
-    return web.Response(
-        content_type="application/json", text=json.dumps({"token": token})
-    )
-
-
 async def on_shutdown(app):
     # close peer connections
     coros = [pc.close() for pc in pcs]
@@ -237,20 +142,7 @@ async def on_shutdown(app):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="WebRTC audio / video / data-channels demo"
-    )
-    parser.add_argument("--cert-file", help="SSL certificate file (for HTTPS)")
-    parser.add_argument("--key-file", help="SSL key file (for HTTPS)")
-    parser.add_argument(
-        "--host", default="localhost", help="Host for HTTP server (default: localhost)"
-    )
-    parser.add_argument(
-        "--port", type=int, default=8080, help="Port for HTTP server (default: 8080)"
-    )
-    parser.add_argument("--verbose", "-v", action="count")
-    parser.add_argument("--write-audio", help="Write received audio to a file")
-    args = parser.parse_args()
+    args = setup_cli_args()
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
