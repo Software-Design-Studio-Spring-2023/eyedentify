@@ -287,14 +287,12 @@ async def update_warnings(request):
 
 async def generate_token(user_id):
     # You need to replace "API_KEY" and "API_SECRET" with your LiveKit API credentials
-    API_KEY = "APIZwCre6ju7wNR"
-    API_SECRET = "ifHJXfPre7IelasUdyugq1MKTHtPP9QGHcteOXiqqG9B"
+    API_KEY = "APIHQFZktdSvLyM"
+    API_SECRET = "j7c47tGVqe3gZYe6Aai5YT2i2sr8fV9SuPAfI3PO0l9B"
 
     # Create an access token which we will sign and return to the client,
     # containing the grant we just created
-    token = AccessToken(API_KEY, API_SECRET, VideoGrant(room="exam"))
-    token.identity = {'id': int(user_id)}
-
+    token = AccessToken(API_KEY, API_SECRET, VideoGrant(room="exam", room_join=True), identity=user_id)
     return token.to_jwt()
 
 async def get_livekit_token(request):
