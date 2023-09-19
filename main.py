@@ -7,7 +7,7 @@ import ssl
 from aiohttp import web
 import aiohttp_cors
 from pymongo import MongoClient
-from lib.livekit_tokens import get_livekit_token
+from lib.livekit_tokens import get_student_token, get_staff_token
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
@@ -89,7 +89,7 @@ async def update_terminate(request):
 
         if user_id and terminated is not None:
             # Find user by ID and update their loggedIn status
-            response = user..update_one(
+            response = userCollection.update_one(
                 {"id": int(user_id)}, {"$set": {"terminated": terminated}}
             )
 
@@ -164,7 +164,9 @@ if __name__ == "__main__":
     app.router.add_patch("/api/update_login/{id}", update_login)
     app.router.add_patch("/api/update_warnings/{id}", update_warnings)
     app.router.add_patch("/api/update_terminate/{id}", update_terminate)
-    app.router.add_get("/api/get_livekit_token/{id}", get_livekit_token)
+    app.router.add_get("/api/get_student_token/{id}", get_student_token)
+    app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
+
 
     cors = aiohttp_cors.setup(
         app,
