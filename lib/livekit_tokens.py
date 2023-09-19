@@ -10,7 +10,7 @@ async def generate_student_token(user_id):
     API_SECRET = "j7c47tGVqe3gZYe6Aai5YT2i2sr8fV9SuPAfI3PO0l9B"
 
     token = AccessToken(
-        API_KEY, API_SECRET, VideoGrant(room="exam", room_join=True, can_publish=True, can_subscribe=False, can_publish_sources=["camera"]), identity=user_id
+        API_KEY, API_SECRET, VideoGrant(room="exam", room_join=True, can_publish=True, can_subscribe=False), identity=user_id
     )
     return token.to_jwt()
 
