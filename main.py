@@ -89,7 +89,7 @@ async def update_terminate(request):
 
         if user_id and terminated is not None:
             # Find user by ID and update their loggedIn status
-            response = userCollection.update_one(
+            response = user..update_one(
                 {"id": int(user_id)}, {"$set": {"terminated": terminated}}
             )
 
@@ -103,8 +103,10 @@ async def update_terminate(request):
         else:
             raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
 
+
     except Exception as e:
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
+
 
 
 async def update_warnings(request):
