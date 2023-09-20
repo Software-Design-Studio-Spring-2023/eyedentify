@@ -2,7 +2,9 @@
 var dataChannelLog = document.getElementById("data-channel"),
   iceConnectionLog = document.getElementById("ice-connection-state"),
   iceGatheringLog = document.getElementById("ice-gathering-state"),
-  signalingLog = document.getElementById("signaling-state");
+  signalingLog = document.getElementById("signaling-state"),
+  warningButton = document.getElementById("warning-button"),
+  connectedUser;
 
 // peer connection
 var pc = null;
@@ -155,14 +157,43 @@ function start() {
         dc.send(message);
       }, 1000);
     };
-    dc.onmessage = function (evt) {
-      dataChannelLog.textContent += "< " + evt.data + "\n";
 
-      if (evt.data.substring(0, 4) === "pong") {
-        var elapsed_ms = current_stamp() - parseInt(evt.data.substring(5), 10);
-        dataChannelLog.textContent += " RTT " + elapsed_ms + " ms\n";
+    dc.onmessage = function (evt) {
+      console.log("recieved Message", evt.data);
+      dataChannelLog.textContent += "< " + evt.data + "\n";
+      var data = JSON.parse(evt.data);
+
+      switch(evt.type) {
+        case "warning":
+          window.alert(evt.data);
+          console.log("Recieved warning:", evt.data)
+          break;
+        case "pong":
+          var elapsed_ms = current_stamp() - parseInt(evt.data.substring(5), 10);
+          dataChannelLog.textContent += " RTT " + elapsed_ms + " ms\n";
+          break;
+        default:
+          break;
       }
     };
+  }
+
+    // Listener for warning click
+    warningButton.addEventListener("click", function(event){
+      console.log("Send Warning");
+      dc.send({
+        type: "warning",
+        data: "Misconduct Issued"
+      });
+      //sendWarning(warningMessage)
+    });
+
+  // Function to send warning to client
+  function sendWarning(message) {
+    // if  (connectedUser) {
+    //   message.name = connectedUser;
+    // }
+    dc.send(JSON.stringify(message));
   }
 
   var constraints = {

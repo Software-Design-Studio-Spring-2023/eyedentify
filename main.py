@@ -23,11 +23,7 @@ ROOT = os.path.dirname(__file__) + "/frontend/"
 
 logger = logging.getLogger("pc")
 pcs = set()
-
-from pymongo import MongoClient
-
-
-
+connected_clients = set() # Keep track of conneted clients
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -145,11 +141,27 @@ async def offer(request):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
+        clientInfo = {"pc": pc, "channel": channel}
+        connected_clients.add(clientInfo)
         @channel.on("message")
         def on_message(message):
-            if isinstance(message, str) and message.startswith("ping"):
-                channel.send("pong" + message[4:])
+            if isinstance(message, str) and message.startswith("ping"):  
+                channel.send({
+                    type: "pong",
+                    message: message[4:]})
                 channel.send("detections: " + str(obj.currentDetectedObjects))
+            elif isinstance(message, str) and message.get("type") == "warning":
+                channel.send({
+                    type: "warning",
+                    message: "Warning Issued"
+                })
+
+    def broadcast_warning(message):
+        for client in connected_clients:
+            try:
+                client["channel"].send(message)
+            except Exception as e:
+                print(f"Error sending warning to client: {e}")
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
@@ -157,7 +169,8 @@ async def offer(request):
         if pc.iceConnectionState == "failed":
             await pc.close()
             pcs.discard(pc)
-
+            connected_clients.discard(pc)
+            
     @pc.on("track")
     def on_track(track):
         log_info("Track %s received", track.kind)
