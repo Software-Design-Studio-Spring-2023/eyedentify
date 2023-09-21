@@ -1,3 +1,4 @@
+from pymongo import MongoClient
 import argparse
 import asyncio
 import json
@@ -22,12 +23,11 @@ ROOT = os.path.dirname(__file__) + "/frontend/"
 logger = logging.getLogger("pc")
 pcs = set()
 
-from pymongo import MongoClient
 
-client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
+client = MongoClient(
+    "mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
-
 
 
 class VideoTransformTrack(MediaStreamTrack):
@@ -76,6 +76,7 @@ class VideoTransformTrack(MediaStreamTrack):
             return new_frame
         elif self.transform == "object-detection":
             img = frame.to_ndarray(format="bgr24")
+
             detections = obj.detectFrameByFrame(img)
             # draw the detection results onto the original image
             for detection in detections[1]:
@@ -98,13 +99,54 @@ class VideoTransformTrack(MediaStreamTrack):
                     (0, 255, 0),
                     2,
                 )
+
             new_frame = VideoFrame.from_ndarray(img, format="bgr24")
             new_frame.pts = frame.pts
             new_frame.time_base = frame.time_base
             return new_frame
-            
+
+        elif self.transform == "bgBlur":
+            img = frame.to_ndarray(format="bgr24")
+
+            detections = obj.detectFrameByFrame(img)
+            # draw the detection results onto the original image
+            roi = img[0:1, 0:1]
+            xOne, xWidth, yOne, yHeight = 0, 0, 0, 0
+            for detection in detections[1]:
+                if (detection["name"] == "person"):
+                    xOne = int(detection["box_points"][0])
+                    yOne = int(detection["box_points"][1])
+                    xTwo = int(detection["box_points"][2])
+                    yTwo = int(detection["box_points"][3])
+                    xWidth = xTwo - xOne
+                    yHeight = yTwo - yOne
+                    # cv2.rectangle(
+                    #     img,
+                    #     (detection["box_points"][0],
+                    #      detection["box_points"][1]),
+                    #     (detection["box_points"][2],
+                    #      detection["box_points"][3]),
+                    #     (0, 255, 0),
+                    #     2,
+                    # )
+                    roi = img[yOne:yOne+yHeight, xOne:xOne+xWidth]
+            # blurred_img = cv2.GaussianBlur(roi, (55, 55), 0)
+            blurred_img = cv2.GaussianBlur(img, (55, 55), 0)
+            blurred_img[yOne:yOne+yHeight, xOne:xOne + xWidth] = roi
+            img = blurred_img
+
+            # blurred_img[int(detection["box_points"][0]):int(detection["box_points"][1]), int(
+            #             detection["box_points"][2]):int(detection["box_points"][3])] = face
+            # img = cv2.bitwise_xor(blurred_img, face)
+
+            new_frame = VideoFrame.from_ndarray(img, format="bgr24")
+            new_frame.pts = frame.pts
+            new_frame.time_base = frame.time_base
+            return new_frame
+
         else:
             return frame
+
 
 async def index(request):
     content = open(os.path.join(ROOT, "index.html"), "r").read()
@@ -115,12 +157,26 @@ async def javascript(request):
     content = open(os.path.join(ROOT, "client.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
 
+
 async def getAllUsers(request):
     allUsers = userCollection.find({})
     allUsers = list(allUsers)
     for user in allUsers:
         user["_id"] = str(user["_id"])
     return web.Response(content_type="application/json", text=json.dumps(allUsers))
+
+
+async def blur_img(img, factor=20):
+    kW = int(img.shape[1]/factor)
+    kH = int(img.shape[0]/factor)
+
+    if kW % 2 == 0:
+        kW = kW-1
+    if kH % 2 == 0:
+        kH = kH-1
+
+    blurred_img = cv2.GaussianBlur(img, (kW, kH), 0)
+    return blurred_img
 
 
 async def offer(request):
@@ -148,7 +204,7 @@ async def offer(request):
     def on_datachannel(channel):
         @channel.on("message")
         def on_message(message):
-            if isinstance(message, str) and message.startswith("ping"):  
+            if isinstance(message, str) and message.startswith("ping"):
                 channel.send("pong" + message[4:])
                 channel.send("detections: " + str(obj.currentDetectedObjects))
 
@@ -229,14 +285,14 @@ if __name__ == "__main__":
 
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
-    
+
     app.router.add_get("/", index)
     app.router.add_get("/client.js", javascript)
     app.router.add_post("/offer", offer)
     app.router.add_get("/api/all_users", getAllUsers)
 
     cors = aiohttp_cors.setup(app, defaults={
-    "*": aiohttp_cors.ResourceOptions(
+        "*": aiohttp_cors.ResourceOptions(
             allow_credentials=True,
             expose_headers="*",
             allow_headers="*"
@@ -245,7 +301,7 @@ if __name__ == "__main__":
 
     for route in list(app.router.routes()):
         cors.add(route)
-    
+
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
     )
