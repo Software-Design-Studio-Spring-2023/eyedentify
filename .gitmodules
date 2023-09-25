@@ -1,5 +1,5 @@
-[submodule "frontend-core"]
-	path = frontend-core
+[submodule "frontend_core"]
+	path = frontend_core
 	url = git@github.com:Software-Design-Studio-Spring-2023/frontend_core.git
 
 [submodule "monitoring_core"]
