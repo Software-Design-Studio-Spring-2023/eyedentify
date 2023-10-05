@@ -3,6 +3,7 @@
 # platform: osx-arm64
 absl-py
 aiohttp
+aiohttp_cors
 # aioice
 # aiortc
 aiosignal
@@ -100,6 +101,7 @@ libxcb
 libxml2
 libzlib
 llvm-openmp
+livekit
 markupsafe
 mpmath
 multidict
@@ -122,6 +124,7 @@ py-opencv
 pycparser
 pyee
 # pylibsrtp
+pymongo
 pyopenssl
 pysocks
 python
