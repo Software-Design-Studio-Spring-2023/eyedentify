@@ -7,26 +7,26 @@ aiohttp_cors
 # aioice
 # aiortc
 aiosignal
-aom
+# aom
 async-timeout
 attrs
 av
 bidict
 blinker
-brotli-python
-bzip2
-c-ares
-ca-certificates
-cairo
+# brotli-python
+# bzip2
+# c-ares
+# ca-certificates
+# cairo
 certifi
 cffi
 charset-normalizer
 click
 cryptography
-dav1d
+# dav1d
 dlib
 dnspython
-expat
+# expat
 face-recognition
 # face-recognition-models
 ffmpeg
@@ -34,10 +34,10 @@ filelock
 flask
 flask-cors
 flask-socketio
-font-ttf-dejavu-sans-mono
-font-ttf-inconsolata
-font-ttf-source-code-pro
-font-ttf-ubuntu
+# font-ttf-dejavu-sans-mono
+# font-ttf-inconsolata
+# font-ttf-source-code-pro
+# font-ttf-ubuntu
 fontconfig
 fonts-conda-ecosystem
 fonts-conda-forge
