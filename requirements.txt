@@ -38,20 +38,20 @@ flask-socketio
 # font-ttf-inconsolata
 # font-ttf-source-code-pro
 # font-ttf-ubuntu
-fontconfig
-fonts-conda-ecosystem
-fonts-conda-forge
-freetype
-fribidi
+# fontconfig
+# fonts-conda-ecosystem
+# fonts-conda-forge
+# freetype
+# fribidi
 frozenlist
-gettext
-gmp
-gnutls
+# gettext
+# gmp
+# gnutls
 google-crc32c
 graphite2
 h11
-harfbuzz
-hdf5
+# harfbuzz
+# hdf5
 icu
 idna
 ifaddr
@@ -61,82 +61,82 @@ itsdangerous
 jasper
 jinja2
 krb5
-lame
-lcms2
+# lame
+# lcms2
 lerc
-libabseil
-libaec
-libass
-libblas
-libcblas
-libcurl
-libcxx
-libdeflate
-libedit
-libev
-libexpat
-libffi
-libgfortran
-libgfortran5
-libglib
-libiconv
-libidn2
-libjpeg-turbo
-liblapack
-liblapacke
-libnghttp2
-libopenblas
-libopencv
-libopus
-libpng
-libprotobuf
-libsqlite
-libssh2
-libtasn1
-libtiff
-libunistring
-libvpx
-libwebp-base
-libxcb
-libxml2
-libzlib
-llvm-openmp
+# libabseil
+# libaec
+# libass
+# libblas
+# libcblas
+# libcurl
+# libcxx
+# libdeflate
+# libedit
+# libev
+# libexpat
+# libffi
+# libgfortran
+# libgfortran5
+# libglib
+# libiconv
+# libidn2
+# libjpeg-turbo
+# liblapack
+# liblapacke
+# libnghttp2
+# libopenblas
+# libopencv
+# libopus
+# libpng
+# libprotobuf
+# libsqlite
+# libssh2
+# libtasn1
+# libtiff
+# libunistring
+# libvpx
+# libwebp-base
+# libxcb
+# libxml2
+# libzlib
+# llvm-openmp
 livekit
 markupsafe
 mpmath
 multidict
-ncurses
-nettle
+# ncurses
+# nettle
 networkx
 numpy
-opencv
-openh264
-openjpeg
-openssl
-p11-kit
+# opencv
+# openh264
+# openjpeg
+# openssl
+# p11-kit
 pathlib
 pcre2
 pillow
 pip
-pixman
-pthread-stubs
-py-opencv
+# pixman
+# pthread-stubs
+# py-opencv
 pycparser
 pyee
 # pylibsrtp
 pymongo
 pyopenssl
 pysocks
-python
+# python
 python-engineio
 python-socketio
-python_abi
-readline
+# python_abi
+# readline
 requests
 setuptools
 simple-websocket
 six
-svt-av1
+# svt-av1
 sympy
 tk
 # torch
@@ -149,12 +149,12 @@ websockets
 werkzeug
 wheel
 wsproto
-x264
-x265
-xorg-libxau
-xorg-libxdmcp
-xz
+# x264
+# x265
+# xorg-libxau
+# xorg-libxdmcp
+# xz
 yarl
 zipp
-zlib
+# zlib
 zstd
