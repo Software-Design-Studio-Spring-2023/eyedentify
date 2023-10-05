@@ -7,7 +7,7 @@ import ssl
 from aiohttp import web
 import aiohttp_cors
 from pymongo import MongoClient
-from livekit_tokens import get_student_token, get_staff_token
+from api_core.livekit_tokens import get_student_token, get_staff_token
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
