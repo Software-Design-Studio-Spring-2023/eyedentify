@@ -102,7 +102,7 @@ imageai
 # libzlib
 # llvm-openmp
 livekit
-livekit-server-sdk-python
+livekit-server-sdk-python==0.1.0
 # markupsafe
 # mpmath
 # multidict
