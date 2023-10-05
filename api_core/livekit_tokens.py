@@ -1,5 +1,4 @@
-from livekit import AccessToken
-from livekit import VideoGrant
+import livekit
 from aiohttp import web
 import json
 
@@ -9,10 +8,10 @@ async def generate_student_token(user_id):
     API_KEY = "APIHQFZktdSvLyM"
     API_SECRET = "j7c47tGVqe3gZYe6Aai5YT2i2sr8fV9SuPAfI3PO0l9B"
 
-    token = AccessToken(
+    token = livekit.AccessToken(
         API_KEY,
         API_SECRET,
-        VideoGrant(room="exam", room_join=True, can_publish=True, can_subscribe=False),
+        livekit.VideoGrant(room="exam", room_join=True, can_publish=True, can_subscribe=False),
         identity=user_id,
     )
     return token.to_jwt()
@@ -34,10 +33,10 @@ async def generate_staff_token(user_id):
     API_KEY = "APIHQFZktdSvLyM"
     API_SECRET = "j7c47tGVqe3gZYe6Aai5YT2i2sr8fV9SuPAfI3PO0l9B"
 
-    token = AccessToken(
+    token = livekit.AccessToken(
         API_KEY,
         API_SECRET,
-        VideoGrant(room="exam", room_join=True, can_publish=False, can_subscribe=True),
+        livekit.VideoGrant(room="exam", room_join=True, can_publish=False, can_subscribe=True),
         identity=user_id,
     )
     return token.to_jwt()
