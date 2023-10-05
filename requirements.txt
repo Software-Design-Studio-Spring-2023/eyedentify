@@ -1,36 +1,36 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: osx-arm64
-absl-py
+# absl-py
 aiohttp
 aiohttp_cors
 # aioice
 # aiortc
-aiosignal
+# aiosignal
 # aom
 async-timeout
-attrs
-av
-bidict
-blinker
+# attrs
+# av
+# bidict
+# blinker
 # brotli-python
 # bzip2
 # c-ares
 # ca-certificates
 # cairo
-certifi
-cffi
-charset-normalizer
-click
-cryptography
+# certifi
+# cffi
+# charset-normalizer
+# click
+# cryptography
 # dav1d
 # dlib
-dnspython
+# dnspython
 # expat
-face-recognition
+# face-recognition
 # face-recognition-models
-ffmpeg
-filelock
+# ffmpeg
+# filelock
 flask
 flask-cors
 flask-socketio
@@ -43,27 +43,27 @@ flask-socketio
 # fonts-conda-forge
 # freetype
 # fribidi
-frozenlist
+# frozenlist
 # gettext
 # gmp
 # gnutls
-google-crc32c
-graphite2
-h11
+# google-crc32c
+# graphite2
+# h11
 # harfbuzz
 # hdf5
-icu
-idna
-ifaddr
+# icu
+# idna
+# ifaddr
 imageai
-importlib-metadata
-itsdangerous
-jasper
-jinja2
-krb5
+# importlib-metadata
+# itsdangerous
+# jasper
+# jinja2
+# krb5
 # lame
 # lcms2
-lerc
+# lerc
 # libabseil
 # libaec
 # libass
@@ -103,12 +103,12 @@ lerc
 # llvm-openmp
 livekit
 livekit-server-sdk-python
-markupsafe
-mpmath
-multidict
+# markupsafe
+# mpmath
+# multidict
 # ncurses
 # nettle
-networkx
+# networkx
 numpy
 # opencv
 # openh264
@@ -116,46 +116,46 @@ numpy
 # openssl
 # p11-kit
 pathlib
-pcre2
-pillow
+# pcre2
+# pillow
 pip
 # pixman
 # pthread-stubs
 # py-opencv
-pycparser
-pyee
+# pycparser
+# pyee
 # pylibsrtp
 pymongo
-pyopenssl
-pysocks
+# pyopenssl
+# pysocks
 # python
-python-engineio
-python-socketio
+# python-engineio
+# python-socketio
 # python_abi
 # readline
-requests
-setuptools
-simple-websocket
-six
+# requests
+# setuptools
+# simple-websocket
+# six
 # svt-av1
-sympy
-tk
+# sympy
+# tk
 # torch
-torchvision
+# torchvision
 typing-extensions
 typing_extensions
-tzdata
-urllib3
-websockets
-werkzeug
-wheel
-wsproto
+# tzdata
+# urllib3
+# websockets
+# werkzeug
+# wheel
+# wsproto
 # x264
 # x265
 # xorg-libxau
 # xorg-libxdmcp
 # xz
-yarl
-zipp
+# yarl
+# zipp
 # zlib
-zstd
+# zstd
