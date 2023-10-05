@@ -143,6 +143,8 @@ async def on_shutdown(app):
 
 def run_server():
     args = setup_cli_args()
+    
+    port = int(os.environ.get("PORT", 8080))
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -178,5 +180,6 @@ def run_server():
         cors.add(route)
 
     web.run_app(
-        app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
+         app, access_log=None, host=args.host, port=port, ssl_context=ssl_context
+    
     )
