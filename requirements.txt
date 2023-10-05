@@ -24,7 +24,7 @@ charset-normalizer
 click
 cryptography
 # dav1d
-dlib
+# dlib
 dnspython
 # expat
 face-recognition
@@ -102,6 +102,7 @@ lerc
 # libzlib
 # llvm-openmp
 livekit
+livekit-server-sdk-python
 markupsafe
 mpmath
 multidict
