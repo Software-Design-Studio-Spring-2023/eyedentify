@@ -1,157 +1,161 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: osx-arm64
-absl-py
+# absl-py
 aiohttp
+aiohttp_cors
 # aioice
 # aiortc
-aiosignal
-aom
+# aiosignal
+# aom
 async-timeout
-attrs
-av
-bidict
-blinker
-brotli-python
-bzip2
-c-ares
-ca-certificates
-cairo
-certifi
-cffi
-charset-normalizer
-click
-cryptography
-dav1d
-dlib
-dnspython
-expat
-face-recognition
+# attrs
+# av
+# bidict
+# blinker
+# brotli-python
+# bzip2
+# c-ares
+# ca-certificates
+# cairo
+# certifi
+# cffi
+# charset-normalizer
+# click
+# cryptography
+# dav1d
+# dlib
+# dnspython
+# expat
+# face-recognition
 # face-recognition-models
-ffmpeg
-filelock
+# ffmpeg
+# filelock
 flask
 flask-cors
 flask-socketio
-font-ttf-dejavu-sans-mono
-font-ttf-inconsolata
-font-ttf-source-code-pro
-font-ttf-ubuntu
-fontconfig
-fonts-conda-ecosystem
-fonts-conda-forge
-freetype
-fribidi
-frozenlist
-gettext
-gmp
-gnutls
-google-crc32c
-graphite2
-h11
-harfbuzz
-hdf5
-icu
-idna
-ifaddr
+# font-ttf-dejavu-sans-mono
+# font-ttf-inconsolata
+# font-ttf-source-code-pro
+# font-ttf-ubuntu
+# fontconfig
+# fonts-conda-ecosystem
+# fonts-conda-forge
+# freetype
+# fribidi
+# frozenlist
+# gettext
+# gmp
+# gnutls
+# google-crc32c
+# graphite2
+# h11
+# harfbuzz
+# hdf5
+# icu
+# idna
+# ifaddr
 imageai
-importlib-metadata
-itsdangerous
-jasper
-jinja2
-krb5
-lame
-lcms2
-lerc
-libabseil
-libaec
-libass
-libblas
-libcblas
-libcurl
-libcxx
-libdeflate
-libedit
-libev
-libexpat
-libffi
-libgfortran
-libgfortran5
-libglib
-libiconv
-libidn2
-libjpeg-turbo
-liblapack
-liblapacke
-libnghttp2
-libopenblas
-libopencv
-libopus
-libpng
-libprotobuf
-libsqlite
-libssh2
-libtasn1
-libtiff
-libunistring
-libvpx
-libwebp-base
-libxcb
-libxml2
-libzlib
-llvm-openmp
-markupsafe
-mpmath
-multidict
-ncurses
-nettle
-networkx
+# importlib-metadata
+# itsdangerous
+# jasper
+# jinja2
+# krb5
+# lame
+# lcms2
+# lerc
+# libabseil
+# libaec
+# libass
+# libblas
+# libcblas
+# libcurl
+# libcxx
+# libdeflate
+# libedit
+# libev
+# libexpat
+# libffi
+# libgfortran
+# libgfortran5
+# libglib
+# libiconv
+# libidn2
+# libjpeg-turbo
+# liblapack
+# liblapacke
+# libnghttp2
+# libopenblas
+# libopencv
+# libopus
+# libpng
+# libprotobuf
+# libsqlite
+# libssh2
+# libtasn1
+# libtiff
+# libunistring
+# libvpx
+# libwebp-base
+# libxcb
+# libxml2
+# libzlib
+# llvm-openmp
+livekit
+livekit-server-sdk-python
+# markupsafe
+# mpmath
+# multidict
+# ncurses
+# nettle
+# networkx
 numpy
-opencv
-openh264
-openjpeg
-openssl
-p11-kit
+# opencv
+# openh264
+# openjpeg
+# openssl
+# p11-kit
 pathlib
-pcre2
-pillow
+# pcre2
+# pillow
 pip
-pixman
-pthread-stubs
-py-opencv
-pycparser
-pyee
+# pixman
+# pthread-stubs
+# py-opencv
+# pycparser
+# pyee
 # pylibsrtp
-pyopenssl
-pysocks
-python
-python-engineio
-python-socketio
-python_abi
-readline
-requests
-setuptools
-simple-websocket
-six
-svt-av1
-sympy
-tk
+pymongo
+# pyopenssl
+# pysocks
+# python
+# python-engineio
+# python-socketio
+# python_abi
+# readline
+# requests
+# setuptools
+# simple-websocket
+# six
+# svt-av1
+# sympy
+# tk
 # torch
-torchvision
+# torchvision
 typing-extensions
 typing_extensions
-tzdata
-urllib3
-websockets
-werkzeug
-wheel
-wsproto
-x264
-x265
-xorg-libxau
-xorg-libxdmcp
-xz
-yarl
-zipp
-zlib
-zstd
+# tzdata
+# urllib3
+# websockets
+# werkzeug
+# wheel
+# wsproto
+# x264
+# x265
+# xorg-libxau
+# xorg-libxdmcp
+# xz
+# yarl
+# zipp
+# zlib
+# zstd

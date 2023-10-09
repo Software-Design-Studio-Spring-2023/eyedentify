@@ -1,3 +1,11 @@
-[submodule "frontend-core"]
-	path = frontend-core
-	url = git@github.com:Software-Design-Studio-Spring-2023/frontend-core.git
+[submodule "frontend_core"]
+	path = frontend_core
+	url = git@github.com:Software-Design-Studio-Spring-2023/frontend_core.git
+
+[submodule "monitoring_core"]
+	path = monitoring_core
+	url = git@github.com:Software-Design-Studio-Spring-2023/monitoring_core.git
+
+[submodule "api_core"]
+	path = api_core
+	url = git@github.com:Software-Design-Studio-Spring-2023/api_core.git
