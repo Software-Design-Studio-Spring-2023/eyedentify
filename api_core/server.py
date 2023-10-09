@@ -78,6 +78,84 @@ async def update_login(request):
 
     except Exception as e:
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
+    
+async def update_warning_one(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get("id", None)
+        data = await request.json()
+        warningOne = data.get("warningOne", None)
+
+        if user_id and warningOne is not None:
+            # Find user by ID and update their loggedIn status
+            response = userCollection.update_one(
+                {"id": int(user_id)}, {"$set": {"warningOne": warningOne}}
+            )
+
+            if response.matched_count:
+                return web.Response(
+                    content_type="application/json",
+                    text=json.dumps({"message": "User status updated successfully"}),
+                )
+            else:
+                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({"message": str(e)}))
+    
+async def update_warning_two(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get("id", None)
+        data = await request.json()
+        warningTwo = data.get("warningTwo", None)
+
+        if user_id and warningTwo is not None:
+            # Find user by ID and update their loggedIn status
+            response = userCollection.update_one(
+                {"id": int(user_id)}, {"$set": {"warningTwo": warningTwo}}
+            )
+
+            if response.matched_count:
+                return web.Response(
+                    content_type="application/json",
+                    text=json.dumps({"message": "User status updated successfully"}),
+                )
+            else:
+                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({"message": str(e)}))
+    
+async def update_ready(request):
+    try:
+        # Get user ID and update data from request
+        user_id = request.match_info.get("id", None)
+        data = await request.json()
+        ready = data.get("ready", None)
+
+        if user_id and ready is not None:
+            # Find user by ID and update their loggedIn status
+            response = userCollection.update_one(
+                {"id": int(user_id)}, {"$set": {"ready": ready}}
+            )
+
+            if response.matched_count:
+                return web.Response(
+                    content_type="application/json",
+                    text=json.dumps({"message": "User status updated successfully"}),
+                )
+            else:
+                raise web.HTTPNotFound(text=json.dumps({"message": "User not found"}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({"message": str(e)}))
 
 
 async def update_terminate(request):
@@ -164,8 +242,12 @@ def run_server():
     app.router.add_patch("/api/update_login/{id}", update_login)
     app.router.add_patch("/api/update_warnings/{id}", update_warnings)
     app.router.add_patch("/api/update_terminate/{id}", update_terminate)
+    app.router.add_patch("/api/update_warning_one/{id}", update_warning_one)
+    app.router.add_patch("/api/update_warning_two/{id}", update_warning_two)
+    app.router.add_patch("/api/update_ready/{id}", update_ready)
     app.router.add_get("/api/get_student_token/{id}", get_student_token)
     app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
+    
 
     cors = aiohttp_cors.setup(
         app,
@@ -180,6 +262,5 @@ def run_server():
         cors.add(route)
 
     web.run_app(
-         app, access_log=None, host=args.host, port=port, ssl_context=ssl_context
-    
+        app, access_log=None, host='0.0.0.0', port=port, ssl_context=ssl_context
     )
