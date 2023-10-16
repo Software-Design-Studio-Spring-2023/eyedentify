@@ -1,6 +1,6 @@
 from calendar import day_abbr
 from pymongo import MongoClient
-import datetime
+from datetime import datetime
 
 class MongoDbWrapperExam:
     def __init__(self, db_name="Online-Exam-System", collection_name="Exams"):
@@ -12,31 +12,21 @@ class MongoDbWrapperExam:
         print("Connected to MongoDB" + db_name + " " + collection_name)
     
     def insert_exam(
-            self, id_exam, exam_name, supervisor_Id, year, month, day, start_hour, start_min, end_hour, end_min
+            self, id_exam, exam_name, supervisor_Id
     ):
-        
-        start_date_time = datetime.datetime(year, month, day, start_hour, start_min, 0, 0)
-        end_date_time = datetime.datetime(year, month, day, end_hour, end_min, 0, 0)
 
         new_document = {
             "id": id_exam,
             "examName": exam_name,
             "supervisorId": supervisor_Id,
-            "start_time": start_date_time,
-            "end_time": end_date_time,
-            "students": [],
-            "seat": []
+            "has_started": False
         }
         insertion_result = self.exam_collection.insert_one(new_document)
         if insertion_result.inserted_id:
             return insertion_result.inserted_id
         else:
             return None
-        
 
-    def insert_student_exam(self, id_exam, student_id):
-        self.exam_collection.update_one({'id': id_exam}, {'$push': {"students": student_id}})
-        self.exam_collection.update_one({'id': id_exam}, {'$push': {"seat": student_id}})
 
     def delete_exam(self, id_exam):
         query = {'id': id_exam}
@@ -47,7 +37,10 @@ class MongoDbWrapperExam:
        projection = self.exam_collection.find_one(
            query, {field_to_return: True, "_id": False}
            )
-       return projection
+       if projection:
+           return projection
+       else:
+           return None    
 
     def query_whole_document(self, id_exam):
         query = {'id': id_exam}
@@ -56,4 +49,30 @@ class MongoDbWrapperExam:
             return found_documents
         else:
             return None
-        
+
+    def start_exam(self, id_exam):
+        query = {'id': id_exam}
+        self.exam_collection.update_one(query, {"$set": {'has_started': True}})
+    
+    def rest_exam(self, id_exam):
+        query = {'id': id_exam}
+        self.exam_collection.update_one(query, {"$set": {'has_started': False}})
+
+    def flip_exam(self, id_exam):
+        filter = {"id": id_exam}
+
+        # Find the document
+        document = self.exam_collection.find_one(filter)
+
+        if document is not None:
+            # Get the current value of the boolean field
+            current_value = document.get("has_started", False)
+
+            # Calculate the new value
+            new_value = not current_value
+
+            # Update the document with the new value
+            update = {"$set": {"has_started": new_value}}
+            self.exam_collection.update_one(filter, update)
+        else:
+            return None
