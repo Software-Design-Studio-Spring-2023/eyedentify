@@ -16,6 +16,8 @@ pcs = set()
 client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.net/")
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
+examCollection = db["Exams"]
+
 
 
 def setup_cli_args():
@@ -240,6 +242,32 @@ async def update_isSuspicious(request):
 
     except Exception as e:
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
+    
+async def update_exam(request):
+    try:
+        # Get user ID and update data from request
+        exam_id = request.match_info.get("id", None)
+        data = await request.json()
+        has_started = data.get("has_started", None)
+
+        if exam_id and has_started is not None:
+            # Find user by ID and update their isSuspicious status
+            response = examCollection.update_one(
+                {"id": int(exam_id)}, {"$set": {"has_started": has_started}}
+            )
+
+            if response.matched_count:
+                return web.Response(
+                    content_type="application/json",
+                    text=json.dumps({"message": "Exam status updated successfully"}),
+                )
+            else:
+                raise web.HTTPNotFound(text=json.dumps({"message": "Exam not found"}))
+        else:
+            raise web.HTTPBadRequest(text=json.dumps({"message": "Invalid input"}))
+
+    except Exception as e:
+        return web.Response(status=500, text=json.dumps({"message": str(e)}))
 
 
 async def on_shutdown(app):
@@ -276,6 +304,7 @@ def run_server():
     app.router.add_patch("/api/update_warning_two/{id}", update_warning_two)
     app.router.add_patch("/api/update_ready/{id}", update_ready)
     app.router.add_patch("/api/update_isSuspicious/{id}", update_isSuspicious)
+    app.router.add_patch("/api/update_exam/{id}", update_exam)
     app.router.add_get("/api/get_student_token/{id}", get_student_token)
     app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
 
