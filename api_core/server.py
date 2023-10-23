@@ -8,6 +8,9 @@ from aiohttp import web
 import aiohttp_cors
 from pymongo import MongoClient
 from api_core.livekit_tokens import get_student_token, get_staff_token
+import boto3
+from botocore.exceptions import ClientError
+from datetime import datetime, timedelta
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
@@ -18,6 +21,52 @@ db = client["Online-Exam-System"]
 userCollection = db["Users"]
 examCollection = db["Exams"]
 
+import os
+import boto3
+import logging
+
+def create_presigned_url(bucket_name, object_name, expiration=3600):
+    """Generate a presigned URL to share an S3 object
+
+    :param bucket_name: string
+    :param object_name: string
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+    
+    # Fetch AWS credentials from environment variables
+    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
+    # Create an S3 client using the fetched credentials
+    s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+
+    try:
+        response = s3_client.generate_presigned_url('put_object',
+                                                    Params={'Bucket': bucket_name,
+                                                            'Key': object_name},
+                                                    ExpiresIn=expiration)
+    except ClientError as e:
+        logging.error(e)
+        return None
+
+    return response
+
+async def get_presigned_url(request):
+    # Retrieve the user id from the request
+    user_id = request.match_info.get('id', None)
+    if not user_id:
+        return web.Response(status=400, text=json.dumps({"message": "User id not provided"}))
+    
+    # Use the user id when generating the object name
+    object_name = f"uploads/{user_id}_exam"
+    
+    url = create_presigned_url("eyedentify100", object_name)
+
+    if url is not None:
+        return web.Response(content_type="application/json", text=json.dumps({"url": url}))
+    else:
+        return web.Response(status=500, text=json.dumps({"message": "Failed to generate URL"}))
 
 
 def setup_cli_args():
@@ -316,6 +365,8 @@ def run_server():
     app.router.add_patch("/api/update_exam/{id}", update_exam)
     app.router.add_get("/api/get_student_token/{id}", get_student_token)
     app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
+    app.router.add_get("/api/presigned_url/{id}", get_presigned_url)
+
 
     cors = aiohttp_cors.setup(
         app,
