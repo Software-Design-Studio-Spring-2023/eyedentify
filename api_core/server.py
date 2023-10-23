@@ -21,10 +21,6 @@ db = client["Online-Exam-System"]
 userCollection = db["Users"]
 examCollection = db["Exams"]
 
-import os
-import boto3
-import logging
-
 def create_presigned_url(bucket_name, object_name, expiration=3600):
     """Generate a presigned URL to share an S3 object
 
