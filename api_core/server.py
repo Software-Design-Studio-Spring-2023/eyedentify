@@ -35,12 +35,12 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
     # Create an S3 client using the fetched credentials
-    s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+    s3_client = boto3.client('s3', region_name="ap-southeast-2", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
     try:
         response = s3_client.generate_presigned_url('put_object',
                                                     Params={'Bucket': bucket_name,
-                                                            'Key': object_name},
+                                                            'Key': object_name,},
                                                     ExpiresIn=expiration)
     except ClientError as e:
         logging.error(e)
@@ -55,7 +55,7 @@ async def get_presigned_url(request):
         return web.Response(status=400, text=json.dumps({"message": "User id not provided"}))
     
     # Use the user id when generating the object name
-    object_name = f"uploads/{user_id}_exam"
+    object_name = f"uploads/{user_id}exam"
     
     url = create_presigned_url("eyedentify100", object_name)
 
