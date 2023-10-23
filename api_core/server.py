@@ -8,6 +8,8 @@ from aiohttp import web
 import aiohttp_cors
 from pymongo import MongoClient
 from api_core.livekit_tokens import get_student_token, get_staff_token
+import boto3
+from datetime import datetime, timedelta
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
@@ -17,6 +19,29 @@ client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.ne
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
 examCollection = db["Exams"]
+
+def create_presigned_url(bucket_name, object_name, expiration=3600):
+    """Generate a presigned URL to share an S3 object
+
+    :param bucket_name: string
+    :param object_name: string
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+
+    # Create an S3 client
+    s3_client = boto3.client('s3', aws_access_key_id='AKIAS5ESS6UQ4BTD5HXS', aws_secret_access_key='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')
+
+    try:
+        response = s3_client.generate_presigned_url('put_object',
+                                                    Params={'Bucket': bucket_name,
+                                                            'Key': object_name},
+                                                    ExpiresIn=expiration)
+    except ClientError as e:
+        logging.error(e)
+        return None
+
+    return response
 
 
 

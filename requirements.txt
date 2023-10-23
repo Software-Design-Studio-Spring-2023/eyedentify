@@ -13,6 +13,7 @@ async-timeout
 # av
 # bidict
 # blinker
+boto3
 # brotli-python
 # bzip2
 # c-ares
