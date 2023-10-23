@@ -55,6 +55,14 @@ async def getAllUsers(request):
     return web.Response(content_type="application/json", text=json.dumps(allUsers))
 
 
+async def getAllExams(request):
+    allExams = examCollection.find({})
+    allExams = list(allExams)
+    for exam in allExams:
+        exam["_id"] = str(exam["_id"])
+    return web.Response(content_type="application/json", text=json.dumps(allExams))
+
+
 async def update_login(request):
     try:
         # Get user ID and update data from request
@@ -297,6 +305,7 @@ def run_server():
     app.on_shutdown.append(on_shutdown)
 
     app.router.add_get("/api/all_users", getAllUsers)
+    app.router.add_get("/api/all_exams", getAllExams)
     app.router.add_patch("/api/update_login/{id}", update_login)
     app.router.add_patch("/api/update_warnings/{id}", update_warnings)
     app.router.add_patch("/api/update_terminate/{id}", update_terminate)
