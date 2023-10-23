@@ -40,7 +40,8 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     try:
         response = s3_client.generate_presigned_url('put_object',
                                                     Params={'Bucket': bucket_name,
-                                                            'Key': object_name,},
+                                                            'Key': object_name,
+                                                            'ContentType': 'video/webm'},
                                                     ExpiresIn=expiration)
     except ClientError as e:
         logging.error(e)
