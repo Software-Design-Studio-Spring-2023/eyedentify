@@ -32,6 +32,9 @@ boto3
 # face-recognition-models
 # ffmpeg
 # filelock
+flask
+flask-cors
+flask-socketio
 # font-ttf-dejavu-sans-mono
 # font-ttf-inconsolata
 # font-ttf-source-code-pro
@@ -53,6 +56,7 @@ boto3
 # icu
 # idna
 # ifaddr
+imageai
 # importlib-metadata
 # itsdangerous
 # jasper
@@ -111,7 +115,6 @@ numpy
 # openh264
 # openjpeg
 # openssl
-# onnxruntime
 # p11-kit
 pathlib
 # pcre2
@@ -141,7 +144,7 @@ pymongo
 tensorflow
 # torch
 # torchvision
-typing-extensions
+typing_extensions
 # tzdata
 # urllib3
 # websockets
