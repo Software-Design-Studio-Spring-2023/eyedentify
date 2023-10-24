@@ -141,7 +141,6 @@ tensorflow
 # torch
 # torchvision
 typing-extensions
-typing_extensions
 # tzdata
 # urllib3
 # websockets
