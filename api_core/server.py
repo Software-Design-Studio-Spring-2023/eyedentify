@@ -15,7 +15,7 @@ import numpy as np
 import tempfile
 from datetime import datetime, timedelta
 
-model_dir = './efficientdet_d4_coco17_tpu-32/saved_model'
+model_dir = ''
 detection_model = tf.saved_model.load(model_dir)
 
 # set root as ../frontend/
