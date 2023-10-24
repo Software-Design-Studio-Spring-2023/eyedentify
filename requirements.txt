@@ -111,7 +111,7 @@ numpy
 # openh264
 # openjpeg
 # openssl
-onnxruntime
+# onnxruntime
 # p11-kit
 pathlib
 # pcre2
@@ -138,7 +138,7 @@ pymongo
 # svt-av1
 # sympy
 # tk
-
+tensorflow
 # torch
 # torchvision
 typing-extensions
