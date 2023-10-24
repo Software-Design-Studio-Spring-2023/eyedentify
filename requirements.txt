@@ -141,6 +141,7 @@ pymongo
 # svt-av1
 # sympy
 # tk
+tensorflow
 # torch
 # torchvision
 typing-extensions

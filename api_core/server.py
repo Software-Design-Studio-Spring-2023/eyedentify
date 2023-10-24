@@ -10,7 +10,13 @@ from pymongo import MongoClient
 from api_core.livekit_tokens import get_student_token, get_staff_token
 import boto3
 from botocore.exceptions import ClientError
+import tensorflow as tf
+import numpy as np
+import tempfile
 from datetime import datetime, timedelta
+
+model_dir = './efficientdet_d4_coco17_tpu-32/saved_model'
+detection_model = tf.saved_model.load(model_dir)
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
@@ -20,6 +26,53 @@ client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.ne
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
 examCollection = db["Exams"]
+
+def detect_objects(image_path):
+    image_np = np.array(tf.image.decode_image(tf.io.read_file(image_path)))
+    input_tensor = tf.convert_to_tensor(image_np)
+    input_tensor = input_tensor[tf.newaxis, ...]
+
+    detections = detection_model(input_tensor)
+    
+    # Convert the boxes, scores, and classes to arrays
+    boxes = detections['detection_boxes'][0].numpy()
+    scores = detections['detection_scores'][0].numpy()
+    classes = detections['detection_classes'][0].numpy()
+
+    # You can set a threshold to filter out low score detections, for example:
+    MIN_SCORE_THRESH = 0.5
+    valid_indices = np.where(scores > MIN_SCORE_THRESH)[0]
+    
+    valid_boxes = boxes[valid_indices]
+    valid_scores = scores[valid_indices]
+    valid_classes = classes[valid_indices]
+    
+    return valid_boxes, valid_scores, valid_classes
+
+async def object_detection(request):
+    reader = await request.multipart()
+    field = await reader.next()
+    
+    # Check if the field is a file-like field (contains filename, content_type, etc.)
+    assert field.name == 'file'
+    
+    # Create a temporary file and save the uploaded image
+    with tempfile.NamedTemporaryFile(delete=False) as temp:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            temp.write(chunk)
+    
+    # Detect objects in the image
+    boxes, scores, classes = detect_objects(temp.name)
+    os.unlink(temp.name)  # Delete the temporary file
+    
+    # Return the results
+    return web.json_response({
+        "classes": classes.tolist()
+    })
+
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):
     """Generate a presigned URL to share an S3 object
@@ -363,6 +416,7 @@ def run_server():
     app.router.add_get("/api/get_student_token/{id}", get_student_token)
     app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
     app.router.add_get("/api/presigned_url/{id}", get_presigned_url)
+    app.router.add_post("/api/object_detection", object_detection)
 
 
     cors = aiohttp_cors.setup(
