@@ -112,7 +112,6 @@ livekit-server-sdk-python
 # networkx
 numpy
 # opencv
-opencv-python
 # openh264
 # openjpeg
 # openssl
@@ -144,7 +143,7 @@ pymongo
 # tk
 # torch
 # torchvision
-typing_extensions
+typing-extensions
 # tzdata
 # urllib3
 # websockets
