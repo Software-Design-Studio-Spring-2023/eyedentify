@@ -112,6 +112,7 @@ livekit-server-sdk-python
 # networkx
 numpy
 # opencv
+opencv-python
 # openh264
 # openjpeg
 # openssl
