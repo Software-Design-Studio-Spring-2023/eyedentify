@@ -17,7 +17,7 @@ class ObjectDetectionWrapper:
         self.output_path = output_path
         self.frames_per_second = frames_per_second
         self.log_progress = log_progress
-        self.filename = self.student_id + ".avi"
+        # self.filename = self.student_id + ".avi"
         self.frame_detector = ObjectDetection()
         self.frame_detector.setModelTypeAsTinyYOLOv3()
         self.frame_detector.setModelPath(self.model_path)
@@ -51,8 +51,8 @@ class ObjectDetectionWrapper:
             input_image=frame,
             output_type="array",
         )
-        self.currentDetectedObjects = detections[1]
-        return detections
+        self.currentDetectedObjects = detections
+        return detections[1]
 
     def forFrame(frame_number, output_array, output_count):
         print("FOR FRAME ", frame_number)

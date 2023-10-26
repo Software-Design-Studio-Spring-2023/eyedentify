@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+from io import BytesIO
 import json
 import logging
 import os
@@ -12,6 +13,10 @@ from api_core.livekit_tokens import get_student_token, get_staff_token
 import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime, timedelta
+import base64
+from PIL import Image
+import numpy as np
+import cv2
 
 # set root as ../frontend/
 ROOT = os.path.dirname(__file__) + "/frontend/"
@@ -21,7 +26,7 @@ client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.ne
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
 examCollection = db["Exams"]
-objectDetection = ObjectDetectionWrapper()
+objectDetection = ObjectDetectionWrapper("test")
 
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):
@@ -120,12 +125,28 @@ async def getAllUsers(request):
     return web.Response(content_type="application/json", text=json.dumps(allUsers))
 
 
-async def detectFrame(request):
-    # Get the frame from the request
-    data = await request.json()
-    frame = data.get("frame", None)
-    detections = objectDetection.detectFrameByFrame(frame)
-    return web.Response(content_type="application/json", text=json.dumps(detections))
+async def detect_frame(request: web.Request):
+    # print(request)
+    if not request.has_body:
+        return web.Response(
+            status=400, text=json.dumps({"message": "No frame provided"})
+        )
+
+    reader = await request.multipart()
+    field = await reader.next()
+    if field:
+        file_bytes = await field.read()
+        npimg = np.frombuffer(file_bytes, np.uint8)
+        frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+        detections = objectDetection.detectFrameByFrame(frame)
+
+        return web.Response(
+            content_type="application/json", text=json.dumps(detections)
+        )
+    else:
+        return web.Response(
+            status=400, text=json.dumps({"message": "No frame provided"})
+        )
 
 
 async def getAllExams(request):
@@ -421,7 +442,7 @@ def run_server():
     app.router.add_get("/api/get_student_token/{id}", get_student_token)
     app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
     app.router.add_get("/api/presigned_url/{id}", get_presigned_url)
-    app.router.add_get("/api/detect_image", detectFrame)
+    app.router.add_get("/api/detect_image", detect_frame)
 
     cors = aiohttp_cors.setup(
         app,

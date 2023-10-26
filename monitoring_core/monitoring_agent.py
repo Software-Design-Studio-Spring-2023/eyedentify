@@ -8,7 +8,7 @@ import requests
 
 import livekit
 
-from object_detection import ObjectDetectionWrapper
+from api_core.lib.object_detection import ObjectDetectionWrapper
 
 URL = "0.0.0.0:7880"  # hardcoded livekit server
 MONITORING_STUDENT_ID = (
