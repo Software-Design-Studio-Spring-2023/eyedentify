@@ -43,9 +43,7 @@ class ObjectDetectionWrapper:
         """
         This can process a single frame and detect objects in that frame.
         """
-        custom_objects = self.frame_detector.CustomObjects(
-            person=True, cell_phone=True, laptop=True
-        )
+        custom_objects = self.frame_detector.CustomObjects(cell_phone=True, laptop=True)
         detections = self.frame_detector.detectObjectsFromImage(
             custom_objects=custom_objects,
             input_image=frame,
