@@ -7,6 +7,7 @@ import ssl
 from aiohttp import web
 import aiohttp_cors
 from pymongo import MongoClient
+from api_core.lib.object_detection import ObjectDetectionWrapper
 from api_core.livekit_tokens import get_student_token, get_staff_token
 import boto3
 from botocore.exceptions import ClientError
@@ -20,6 +21,8 @@ client = MongoClient("mongodb+srv://Reuben:Fire@systemcluster.hwra6cw.mongodb.ne
 db = client["Online-Exam-System"]
 userCollection = db["Users"]
 examCollection = db["Exams"]
+objectDetection = ObjectDetectionWrapper()
+
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):
     """Generate a presigned URL to share an S3 object
@@ -29,41 +32,57 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     :param expiration: Time in seconds for the presigned URL to remain valid
     :return: Presigned URL as string. If error, returns None.
     """
-    
+
     # Fetch AWS credentials from environment variables
     aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
     aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
     # Create an S3 client using the fetched credentials
-    s3_client = boto3.client('s3', region_name="ap-southeast-2", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+    s3_client = boto3.client(
+        "s3",
+        region_name="ap-southeast-2",
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+    )
 
     try:
-        response = s3_client.generate_presigned_url('put_object',
-                                                    Params={'Bucket': bucket_name,
-                                                            'Key': object_name,
-                                                            'ContentType': 'video/webm'},
-                                                    ExpiresIn=expiration)
+        response = s3_client.generate_presigned_url(
+            "put_object",
+            Params={
+                "Bucket": bucket_name,
+                "Key": object_name,
+                "ContentType": "video/webm",
+            },
+            ExpiresIn=expiration,
+        )
     except ClientError as e:
         logging.error(e)
         return None
 
     return response
 
+
 async def get_presigned_url(request):
     # Retrieve the user id from the request
-    user_id = request.match_info.get('id', None)
+    user_id = request.match_info.get("id", None)
     if not user_id:
-        return web.Response(status=400, text=json.dumps({"message": "User id not provided"}))
-    
+        return web.Response(
+            status=400, text=json.dumps({"message": "User id not provided"})
+        )
+
     # Use the user id when generating the object name
     object_name = f"uploads/{user_id}exam"
-    
+
     url = create_presigned_url("eyedentify100", object_name)
 
     if url is not None:
-        return web.Response(content_type="application/json", text=json.dumps({"url": url}))
+        return web.Response(
+            content_type="application/json", text=json.dumps({"url": url})
+        )
     else:
-        return web.Response(status=500, text=json.dumps({"message": "Failed to generate URL"}))
+        return web.Response(
+            status=500, text=json.dumps({"message": "Failed to generate URL"})
+        )
 
 
 def setup_cli_args():
@@ -99,6 +118,14 @@ async def getAllUsers(request):
     for user in allUsers:
         user["_id"] = str(user["_id"])
     return web.Response(content_type="application/json", text=json.dumps(allUsers))
+
+
+async def detectFrame(request):
+    # Get the frame from the request
+    data = await request.json()
+    frame = data.get("frame", None)
+    detections = objectDetection.detectFrameByFrame(frame)
+    return web.Response(content_type="application/json", text=json.dumps(detections))
 
 
 async def getAllExams(request):
@@ -296,7 +323,8 @@ async def update_isSuspicious(request):
 
     except Exception as e:
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
-    
+
+
 async def update_exam(request):
     try:
         # Get user ID and update data from request
@@ -322,7 +350,8 @@ async def update_exam(request):
 
     except Exception as e:
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
-    
+
+
 async def update_timeStarted(request):
     try:
         # Get user ID and update data from request
@@ -339,7 +368,9 @@ async def update_timeStarted(request):
             if response.matched_count:
                 return web.Response(
                     content_type="application/json",
-                    text=json.dumps({"message": "Exam start time updated successfully"}),
+                    text=json.dumps(
+                        {"message": "Exam start time updated successfully"}
+                    ),
                 )
             else:
                 raise web.HTTPNotFound(text=json.dumps({"message": "Exam not found"}))
@@ -348,7 +379,6 @@ async def update_timeStarted(request):
 
     except Exception as e:
         return web.Response(status=500, text=json.dumps({"message": str(e)}))
-
 
 
 async def on_shutdown(app):
@@ -391,7 +421,7 @@ def run_server():
     app.router.add_get("/api/get_student_token/{id}", get_student_token)
     app.router.add_get("/api/get_staff_token/{id}", get_staff_token)
     app.router.add_get("/api/presigned_url/{id}", get_presigned_url)
-
+    app.router.add_get("/api/detect_image", detectFrame)
 
     cors = aiohttp_cors.setup(
         app,
