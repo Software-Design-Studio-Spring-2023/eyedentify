@@ -139,10 +139,10 @@ async def detect_frame(request: web.Request):
         npimg = np.frombuffer(file_bytes, np.uint8)
         frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
         detections = objectDetection.detectFrameByFrame(frame)
+        # change into json format
+        response = {"detections": detections}
 
-        return web.Response(
-            content_type="application/json", text=json.dumps(detections)
-        )
+        return web.Response(content_type="application/json", body=json.dumps(response))
     else:
         return web.Response(
             status=400, text=json.dumps({"message": "No frame provided"})
